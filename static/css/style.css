@@ -101,8 +101,8 @@ body {
 }
 
 .record-btn {
-    width: 150px;
-    height: 150px;
+    width: 200px;
+    height: 200px;
     border-radius: 50%;
     border: 6px solid var(--pixel-dark);
     background: linear-gradient(45deg, var(--pixel-green), #66BB6A);
@@ -138,7 +138,9 @@ body {
 }
 
 .record-status {
-    margin-top: 20px;
+    margin-top: 30px;
+    padding: 50px;
+    text-align: center;
     font-size: 14px;
     color: var(--pixel-dark);
     font-family: 'Silkscreen', cursive;
@@ -298,19 +300,24 @@ body {
 .result-details {
     background: var(--pixel-dark);
     color: var(--pixel-cream);
-    border: 2px solid var(--pixel-blue);
-    padding: 15px;
-    margin-top: 20px;
-    font-size: 10px;
+    border: 3px solid var(--pixel-blue);
+    border-radius: 6px;
+    padding: 18px 20px;
+    margin-top: 25px;
+    font-size: 12px;
     font-family: 'Silkscreen', cursive;
+    line-height: 1.8;
+    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.4);
     display: none;
+    white-space: pre-line;
+    word-wrap: break-word;
 }
 
 .show-details {
     background: transparent;
     border: 2px solid var(--pixel-dark);
     color: var(--pixel-dark);
-    padding: 8px 15px;
+    padding: 16px 30px;
     font-family: 'Silkscreen', cursive;
     font-size: 10px;
     cursor: pointer;

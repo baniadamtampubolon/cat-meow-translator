@@ -92,120 +92,84 @@ function checkBrowserSupport() {
 
 // Function untuk start recording menggunakan recorder.js
 function startRecording() {
+    if (isRecording) return; // prevent duplicate start
     if (!checkBrowserSupport()) {
-        setStatus('❌ Browser tidak mendukung perekaman audio', 'error');
+        setStatus('❌ Your browser does not support audio recording', 'error');
         return;
     }
 
-    navigator.mediaDevices.getUserMedia({ 
+    navigator.mediaDevices.getUserMedia({
         audio: {
             echoCancellation: true,
             noiseSuppression: true,
-            autoGainControl: true,
-            sampleRate: 44100,
-            channelCount: 1
+            autoGainControl: true
         }
     }).then(stream => {
-        try {
-            // Stop any existing streams
-            stopAllTracks();
-            currentStream = stream;
-            
-            // Create AudioContext
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const input = audioContext.createMediaStreamSource(stream);
-            
-            // Create Recorder instance
-            recorder = new Recorder(input, { 
-                numChannels: 1,
-                sampleRate: 44100
-            });
-            
-            // Start recording
-            recorder.record();
-            
-            // Update UI
-            isRecording = true;
-            recordBtn.classList.add('recording');
-            recordBtn.innerHTML = '🔴<br>RECORDING<br>RELEASE';
-            setStatus('⏺️ Merekam... (maksimal 15 detik)', 'recording');
-            
-            // Start timer
-            startTimer();
-            
-            console.log('Recording started with recorder.js');
-            
-        } catch (error) {
-            console.error('Error starting recording:', error);
-            setStatus(`❌ Error: ${error.message}`, 'error');
-            stopAllTracks();
-            resetUI();
-        }
+        stopAllTracks(); // clear previous if any
+        currentStream = stream;
+
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const input = audioContext.createMediaStreamSource(stream);
+
+        recorder = new Recorder(input, {
+            numChannels: 1,
+            sampleRate: 44100
+        });
+
+        recorder.record();
+        isRecording = true;
+
+        recordBtn.classList.add('recording');
+        recordBtn.innerHTML = '🔴<br>RECORDING<br>RELEASE';
+        setStatus('⏺️ Recording... (Max 15 seconds)', 'recording');
+        startTimer();
+
+        console.log("Recording started.");
     }).catch(error => {
-        console.error('Error accessing microphone:', error);
-        setStatus('❌ Error mengakses mikrofon. Pastikan izin diberikan.', 'error');
+        console.error("Mic error:", error);
+        setStatus('❌ Cant access microphone', 'error');
         resetUI();
     });
 }
 
-// Function untuk stop recording
 function stopRecording() {
-    if (!recorder || !isRecording) return;
-    
-    try {
-        setStatus('⏹️ Menghentikan rekaman...', 'processing');
-        isRecording = false;
-        stopTimer();
-        
-        // Stop recording
-        recorder.stop();
-        
-        // Export WAV and process
-        recorder.exportWAV(blob => {
-            console.log(`WAV blob size: ${blob.size} bytes`);
-            
-            // Stop all tracks
-            stopAllTracks();
-            
-            // Clear recorder
-            recorder.clear();
-            
-            // Validate blob
-            if (blob.size === 0) {
-                setStatus('❌ Rekaman kosong', 'error');
-                resetUI();
-                return;
-            }
-            
-            if (blob.size < 1000) {
-                setStatus('❌ Rekaman terlalu pendek', 'error');
-                resetUI();
-                return;
-            }
-            
-            // Send to server
-            predictWithAjax(blob);
-        });
-        
-    } catch (error) {
-        console.error('Error stopping recording:', error);
-        setStatus(`❌ Error stopping: ${error.message}`, 'error');
+    if (!isRecording || !recorder) return;
+    isRecording = false;
+
+    setStatus('⏹️ Menghentikan rekaman...', 'processing');
+    stopTimer();
+
+    recorder.stop();
+
+    recorder.exportWAV(blob => {
         stopAllTracks();
-        resetUI();
-    }
+        recorder.clear();
+
+        recordBtn.classList.remove('recording');
+        recordBtn.innerHTML = '🎤<br>HOLD TO<br>RECORD';
+
+        if (blob.size === 0 || blob.size < 1000) {
+            setStatus('❌ Record failed is too short', 'error');
+            return;
+        }
+
+        predictWithAjax(blob);
+    });
 }
 
 function resetUI() {
-    recordBtn.classList.remove('recording');
-    recordBtn.innerHTML = '🎤<br>HOLD TO<br>RECORD';
+    stopAllTracks();
+    if (recorder) recorder.clear();
     isRecording = false;
     stopTimer();
+    recordBtn.classList.remove('recording');
+    recordBtn.innerHTML = '🎤<br>HOLD TO<br>RECORD';
 }
 
 // AJAX prediction function
 async function predictWithAjax(audioBlob) {
     try {
-        setStatus('🔄 Menganalisis meow...', 'processing');
+        setStatus('🔄 Analyzing Meow Please Wait...', 'processing');
         
         const formData = new FormData();
         const timestamp = Date.now();
@@ -288,19 +252,28 @@ function displayResult(result) {
         <strong>Confidence:</strong> ${(result.confidence * 100).toFixed(2)}%<br>
         <strong>Timestamp:</strong> ${result.timestamp}
     `;
-    
-    setStatus('✅ Analisis selesai!', 'success');
+
+    setStatus('✅ Analysis Complete!', 'success');
     resetUI();
 }
 
-// Event Listeners
+// Mouse Events
 recordBtn.addEventListener('mousedown', startRecording);
 recordBtn.addEventListener('mouseup', stopRecording);
-recordBtn.addEventListener('mouseleave', stopRecording);
+recordBtn.addEventListener('mouseleave', () => {
+    if (isRecording) stopRecording();
+});
 
-// Touch events for mobile
-recordBtn.addEventListener('touchstart', startRecording);
-recordBtn.addEventListener('touchend', stopRecording);
+// Touch Events (untuk mobile)
+recordBtn.addEventListener('touchstart', e => {
+    e.preventDefault(); // prevent double triggering
+    startRecording();
+});
+recordBtn.addEventListener('touchend', e => {
+    e.preventDefault();
+    if (isRecording) stopRecording();
+});
+
 
 // Show/hide details
 showDetails.addEventListener('click', () => {
@@ -347,7 +320,7 @@ script.onload = function() {
 script.onerror = function() {
     console.error('Failed to load recorder.js');
     browserWarning.style.display = 'block';
-    browserWarning.innerHTML = '⚠️ Gagal memuat recorder.js. Pastikan koneksi internet stabil.';
+    browserWarning.innerHTML = '⚠️ Failed to load recorder.js, make sure your internet connection is stable.';
 };
 document.head.appendChild(script);
 

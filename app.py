@@ -249,7 +249,7 @@ def generate_cat_phrase(label):
         }
         return fallback_phrases.get(label, "Meong meong... aku bingung harus bilang apa")
     
-    prompt = f"saya memiliki model pendeteksi bahasa kucing, dan dia menunjukan perasaan '{label}', anggaplah diri anda seekor kucing yang merasakan perasaan tersebut, apa kata yang anda katakan, gunakan bahasa inggris dan kata yang lucu (selayaknya kucing lucu), jangan gunakan kata-kata yang panjang cukup 2-4 kata saja, dan jangan gunakan tanda baca *, boleh guanakan emoji"
+    prompt = f"saya memiliki model pendeteksi bahasa kucing, dan dia menunjukan perasaan '{label}', anggaplah diri anda seekor kucing yang merasakan perasaan tersebut, apa kata yang anda katakan, gunakan bahasa inggris dan kata yang lucu (selayaknya kucing lucu) namun tetap buat kata-kata yang hidup, jangan gunakan kata-kata yang panjang cukup 3-4 kata saja, dan jangan gunakan tanda baca *, boleh guanakan emoji"
 
     try:
         response = gemini_model.generate_content(prompt)
