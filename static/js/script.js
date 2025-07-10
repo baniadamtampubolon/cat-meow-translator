@@ -78,7 +78,7 @@ function stopAllTracks() {
 }
 
 function setStatus(message, type = '') {
-    statusText.textContent = message;
+    statusText.innerHTML = message;
     statusText.className = type ? `status-${type}` : '';
 }
 
@@ -94,7 +94,7 @@ function checkBrowserSupport() {
 function startRecording() {
     if (isRecording) return; // prevent duplicate start
     if (!checkBrowserSupport()) {
-        setStatus('❌ Your browser does not support audio recording', 'error');
+        setStatus('<br>❌ Your browser does not support audio recording', 'error');
         return;
     }
 
@@ -121,13 +121,13 @@ function startRecording() {
 
         recordBtn.classList.add('recording');
         recordBtn.innerHTML = '🔴<br>RECORDING<br>RELEASE';
-        setStatus('⏺️ Recording... (Max 15 seconds)', 'recording');
+        setStatus('<br>⏺️ Recording... (Max 15 seconds)<br>', 'recording');
         startTimer();
 
         console.log("Recording started.");
     }).catch(error => {
         console.error("Mic error:", error);
-        setStatus('❌ Cant access microphone', 'error');
+        setStatus('<br>❌ Cant access microphone', 'error');
         resetUI();
     });
 }
@@ -136,7 +136,7 @@ function stopRecording() {
     if (!isRecording || !recorder) return;
     isRecording = false;
 
-    setStatus('⏹️ Menghentikan rekaman...', 'processing');
+    setStatus('<br>⏹️ Menghentikan rekaman...', 'processing');
     stopTimer();
 
     recorder.stop();
@@ -146,10 +146,10 @@ function stopRecording() {
         recorder.clear();
 
         recordBtn.classList.remove('recording');
-        recordBtn.innerHTML = '🎤<br>HOLD TO<br>RECORD';
+        recordBtn.innerHTML = '<br>HOLD TO<br>RECORD';
 
         if (blob.size === 0 || blob.size < 1000) {
-            setStatus('❌ Record failed is too short', 'error');
+            setStatus('<br>❌ Record failed is too short', 'error');
             return;
         }
 
@@ -163,13 +163,13 @@ function resetUI() {
     isRecording = false;
     stopTimer();
     recordBtn.classList.remove('recording');
-    recordBtn.innerHTML = '🎤<br>HOLD TO<br>RECORD';
+    recordBtn.innerHTML = '<br>HOLD TO<br>RECORD';
 }
 
 // AJAX prediction function
 async function predictWithAjax(audioBlob) {
     try {
-        setStatus('🔄 Analyzing Meow Please Wait...', 'processing');
+        setStatus('<br>🔄 Analyzing Meow Please Wait...<br>', 'processing');
         
         const formData = new FormData();
         const timestamp = Date.now();
@@ -209,7 +209,7 @@ async function predictWithAjax(audioBlob) {
         
     } catch (error) {
         console.error("Error in AJAX prediction:", error);
-        setStatus(`❌ Error: ${error.message}`, 'error');
+        setStatus(`<br>❌ Error: ${error.message}`, 'error');
         resetUI();
     }
 }
@@ -253,7 +253,7 @@ function displayResult(result) {
         <strong>Timestamp:</strong> ${result.timestamp}
     `;
 
-    setStatus('✅ Analysis Complete!', 'success');
+    setStatus('<br>✅ Analysis Complete!', 'success');
     resetUI();
 }
 
@@ -299,7 +299,7 @@ uploadForm.addEventListener('submit', async function(e) {
     const file = fileInput.files[0];
     if (!file) return;
 
-    setStatus('🔄 Menganalisis file audio...', 'processing');
+    setStatus('<br>🔄 Menganalisis file audio...', 'processing');
     
     // Use the same predictWithAjax function for uploaded files
     predictWithAjax(file);
