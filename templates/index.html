@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Cat Meow Translator</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css" />
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>😺 Cat Meow Translator</h1>
+            <p class="subtitle">Analisis dan terjemahkan suara meow kucingmu!</p>
+        </header>
+
+        <section class="card">
+            <h2><i class="fas fa-upload"></i> Upload File Audio</h2>
+            <form action="/" method="POST" enctype="multipart/form-data" class="upload-form">
+                <input type="file" name="audio_file" accept=".wav,.webm,.mp3" required />
+                <button type="submit" class="btn">Upload Audio</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2><i class="fas fa-microphone"></i> Rekam Meow Langsung</h2>
+            <div class="buttons">
+                <button id="recordBtn" class="btn record">Mulai Rekam</button>
+                <button id="stopBtn" class="btn stop" disabled>Stop & Analisis</button>
+            </div>
+            <p id="status"></p>
+            <div id="recordingTimer" class="timer" style="display: none;">
+                <strong>Durasi: <span id="timer">00:00</span></strong>
+            </div>
+        </section>
+
+        <section id="result-container" class="result-container card"></section>
+
+        <section id="browser-warning" class="warning card" style="display: none;">
+            ⚠️ Browser Anda tidak mendukung perekaman audio. Gunakan Chrome, Firefox, atau Edge terbaru.
+        </section>
+    </div>
+
+    <script src="../static/js/recorder.js"></script>
+    <script src="../static/js/script.js"></script>
+</body>
+</html>

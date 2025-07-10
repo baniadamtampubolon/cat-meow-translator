@@ -1,0 +1,30 @@
+# Python virtual environment
+venv/
+.venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter Notebook files
+.ipynb_checkpoints/
+
+# Notebooks folder as requested
+notebook/
+history/
+app.log
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env    
+env/
+
+recorded.wav
+.vscode
+
+cat-meow-dataset/
