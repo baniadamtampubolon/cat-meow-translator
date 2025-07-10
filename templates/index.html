@@ -7,45 +7,60 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" type="text/css" href="../static/css/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/style.css" />
+    
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>😺 Cat Meow Translator</h1>
-            <p class="subtitle">Analisis dan terjemahkan suara meow kucingmu!</p>
-        </header>
+        <!-- Header -->
+        <div class="header">
+            <div class="title">🐱 Cat Meow Translator</div>
+            <div class="subtitle">Terjemahkan suara meow kucingmu!</div>
+        </div>
 
-        <section class="card">
-            <h2><i class="fas fa-upload"></i> Upload File Audio</h2>
-            <form action="/" method="POST" enctype="multipart/form-data" class="upload-form">
-                <input type="file" name="audio_file" accept=".wav,.webm,.mp3" required />
-                <button type="submit" class="btn">Upload Audio</button>
-            </form>
-        </section>
-
-        <section class="card">
-            <h2><i class="fas fa-microphone"></i> Rekam Meow Langsung</h2>
-            <div class="buttons">
-                <button id="recordBtn" class="btn record">Mulai Rekam</button>
-                <button id="stopBtn" class="btn stop" disabled>Stop & Analisis</button>
+        <!-- Main Recording Section -->
+        <div class="record-section">
+            <button id="recordBtn" class="record-btn">
+                🎤<br>HOLD TO<br>RECORD
+            </button>
+            <div class="record-status" id="status">Tekan dan tahan untuk merekam suara kucing</div>
+            <div class="timer" id="recordingTimer" style="display: none;">
+                <strong>⏱️ <span id="timer">00:00</span></strong>
             </div>
-            <p id="status"></p>
-            <div id="recordingTimer" class="timer" style="display: none;">
-                <strong>Durasi: <span id="timer">00:00</span></strong>
-            </div>
-        </section>
+        </div>
 
-        <section id="result-container" class="result-container card"></section>
+        <!-- Dialog Box for AI Response -->
+        <div class="dialog-box" id="dialogBox">
+            <div class="cat-avatar">😺</div>
+            <div class="dialog-text" id="dialogText"></div>
+            <button class="show-details" id="showDetails" style="display: none;">Show Details</button>
+            <div class="result-details" id="resultDetails"></div>
+        </div>
 
-        <section id="browser-warning" class="warning card" style="display: none;">
+        <!-- Browser Warning -->
+        <div id="browser-warning" class="warning" style="display: none;">
             ⚠️ Browser Anda tidak mendukung perekaman audio. Gunakan Chrome, Firefox, atau Edge terbaru.
-        </section>
+        </div>
+
+        <!-- Developer Mode Toggle -->
+        <button class="dev-toggle" id="devToggle">DEV MODE</button>
+
+        <!-- Developer Section (Hidden by default) -->
+        <div class="dev-section" id="devSection">
+            <h3 style="margin-bottom: 15px;">🔧 Developer Testing</h3>
+            <form class="upload-form" id="uploadForm">
+                <input type="file" name="audio_file" accept=".wav,.webm,.mp3" required />
+                <button type="submit" class="upload-btn">Upload & Test Audio</button>
+            </form>
+        </div>
     </div>
 
-    <script src="../static/js/recorder.js"></script>
     <script src="../static/js/script.js"></script>
+    <script src="../static/js/recorder.js"></script>
+
+
 </body>
 </html>

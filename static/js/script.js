@@ -1,25 +1,49 @@
-
-// Variables untuk recorder.js
+// Variables
 let recorder;
 let currentStream = null;
 let recordingStartTime = null;
 let timerInterval = null;
+let isRecording = false;
+let currentResult = null;
 
+// DOM Elements
 const recordBtn = document.getElementById("recordBtn");
-const stopBtn = document.getElementById("stopBtn");
 const statusText = document.getElementById("status");
 const timerDisplay = document.getElementById("timer");
 const recordingTimer = document.getElementById("recordingTimer");
 const browserWarning = document.getElementById("browser-warning");
+const dialogBox = document.getElementById("dialogBox");
+const dialogText = document.getElementById("dialogText");
+const showDetails = document.getElementById("showDetails");
+const resultDetails = document.getElementById("resultDetails");
+const devToggle = document.getElementById("devToggle");
+const devSection = document.getElementById("devSection");
+const uploadForm = document.getElementById("uploadForm");
 
-// Function untuk format timer
+// Emoji mapping for cat emotions
+const emojiMap = {
+    'angry': '😾',
+    'brushing': '🧹',
+    'defense': '🛡️',
+    'fighting': '🥊',
+    'happy': '😺',
+    'huntingmind': '🐾',
+    'isolation': '😿',
+    'mating': '💞',
+    'mothercall': '👶',
+    'paining': '💢',
+    'resting': '🛏️',
+    'waiting_food': '🍽️',
+    'warning': '⚠️'
+};
+
+// Timer functions
 function formatTime(seconds) {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
-// Function untuk start timer
 function startTimer() {
     recordingStartTime = Date.now();
     recordingTimer.style.display = 'block';
@@ -28,14 +52,12 @@ function startTimer() {
         const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
         timerDisplay.textContent = formatTime(elapsed);
         
-        // Auto-stop setelah 15 detik
         if (elapsed >= 15) {
             stopRecording();
         }
     }, 1000);
 }
 
-// Function untuk stop timer
 function stopTimer() {
     if (timerInterval) {
         clearInterval(timerInterval);
@@ -45,38 +67,23 @@ function stopTimer() {
     timerDisplay.textContent = '00:00';
 }
 
-// Function untuk stop semua media tracks
+// Audio functions
 function stopAllTracks() {
     if (currentStream) {
         currentStream.getTracks().forEach(track => {
-            console.log(`Stopping track: ${track.kind}, state: ${track.readyState}`);
             track.stop();
         });
         currentStream = null;
     }
 }
 
-// Function untuk reset UI
-function resetUI() {
-    recordBtn.disabled = false;
-    stopBtn.disabled = true;
-    statusText.className = '';
-    stopTimer();
-}
-
-// Function untuk set status dengan styling
 function setStatus(message, type = '') {
     statusText.textContent = message;
     statusText.className = type ? `status-${type}` : '';
 }
 
-// Function untuk validasi browser support
 function checkBrowserSupport() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        browserWarning.style.display = 'block';
-        return false;
-    }
-    if (!window.AudioContext && !window.webkitAudioContext) {
         browserWarning.style.display = 'block';
         return false;
     }
@@ -118,8 +125,9 @@ function startRecording() {
             recorder.record();
             
             // Update UI
-            recordBtn.disabled = true;
-            stopBtn.disabled = false;
+            isRecording = true;
+            recordBtn.classList.add('recording');
+            recordBtn.innerHTML = '🔴<br>RECORDING<br>RELEASE';
             setStatus('⏺️ Merekam... (maksimal 15 detik)', 'recording');
             
             // Start timer
@@ -142,11 +150,11 @@ function startRecording() {
 
 // Function untuk stop recording
 function stopRecording() {
-    if (!recorder) return;
+    if (!recorder || !isRecording) return;
     
     try {
         setStatus('⏹️ Menghentikan rekaman...', 'processing');
-        stopBtn.disabled = true;
+        isRecording = false;
         stopTimer();
         
         // Stop recording
@@ -187,6 +195,13 @@ function stopRecording() {
     }
 }
 
+function resetUI() {
+    recordBtn.classList.remove('recording');
+    recordBtn.innerHTML = '🎤<br>HOLD TO<br>RECORD';
+    isRecording = false;
+    stopTimer();
+}
+
 // AJAX prediction function
 async function predictWithAjax(audioBlob) {
     try {
@@ -225,7 +240,7 @@ async function predictWithAjax(audioBlob) {
         const result = JSON.parse(responseText);
         console.log("Prediction result:", result);
         
-        // Display result
+        // Display result using renderPredictionResult (for compatibility)
         renderPredictionResult(result);
         
     } catch (error) {
@@ -237,91 +252,104 @@ async function predictWithAjax(audioBlob) {
 
 // Function untuk display result
 function renderPredictionResult(result) {
-    const resultDiv = document.getElementById('result-container');
-    if (!resultDiv) return;
-
-    const emojiMap = {
-    'angry': '😾',
-    'brushing': '🧹',
-    'defense': '🛡️',
-    'fighting': '🥊',
-    'happy': '😺',
-    'huntingmind': '🐾',
-    'isolation': '😿',
-    'mating': '💞',
-    'mothercall': '👶',
-    'paining': '💢',
-    'resting': '🛏️',
-    'waiting_food': '🍽️',
-    'warning': '⚠️'
-};
-
-    const emoji = emojiMap[result.result?.toLowerCase()] || '🐱';
-
-    resultDiv.innerHTML = `
-        <h2>${emoji} Hasil: ${result.result}</h2>
-        <p><strong>AI Kucing bilang:</strong> ${result.ai_phrase}</p>
-        <p><strong>Confidence:</strong> ${(result.confidence * 100).toFixed(2)}%</p>
-        <p><small>Waktu: ${result.timestamp}</small></p>
-    `;
+    // Use the new displayResult function instead
+    displayResult(result);
 }
 
-
-// Event listeners
-recordBtn.addEventListener('click', startRecording);
-stopBtn.addEventListener('click', stopRecording);
-
-// Cleanup saat halaman di-unload
-window.addEventListener('beforeunload', () => {
-    console.log("Page unloading, cleaning up...");
-    stopAllTracks();
-    stopTimer();
-});
-
-// Handle visibility change untuk cleanup
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-        console.log("Page hidden, cleaning up...");
-        stopAllTracks();
-    }
-});
-
-// Keyboard shortcuts
-document.addEventListener('keydown', (e) => {
-    if (e.code === 'Space' && e.ctrlKey) {
-        e.preventDefault();
-        if (!recordBtn.disabled) {
-            startRecording();
-        } else if (!stopBtn.disabled) {
-            stopRecording();
+// Display result in dialog box
+function displayResult(result) {
+    currentResult = result;
+    const emoji = emojiMap[result.result?.toLowerCase()] || '🐱';
+    
+    // Update cat avatar
+    const catAvatar = dialogBox.querySelector('.cat-avatar');
+    catAvatar.textContent = emoji;
+    
+    // Show dialog with typing animation
+    dialogBox.style.display = 'block';
+    dialogText.innerHTML = '';
+    
+    // Type out the AI phrase
+    const phrase = result.ai_phrase;
+    let i = 0;
+    const typeInterval = setInterval(() => {
+        if (i < phrase.length) {
+            dialogText.innerHTML += phrase.charAt(i);
+            i++;
+        } else {
+            clearInterval(typeInterval);
+            showDetails.style.display = 'inline-block';
         }
+    }, 50);
+    
+    // Prepare details
+    resultDetails.innerHTML = `
+        <strong>Emotion:</strong> ${result.result}<br>
+        <strong>Confidence:</strong> ${(result.confidence * 100).toFixed(2)}%<br>
+        <strong>Timestamp:</strong> ${result.timestamp}
+    `;
+    
+    setStatus('✅ Analisis selesai!', 'success');
+    resetUI();
+}
+
+// Event Listeners
+recordBtn.addEventListener('mousedown', startRecording);
+recordBtn.addEventListener('mouseup', stopRecording);
+recordBtn.addEventListener('mouseleave', stopRecording);
+
+// Touch events for mobile
+recordBtn.addEventListener('touchstart', startRecording);
+recordBtn.addEventListener('touchend', stopRecording);
+
+// Show/hide details
+showDetails.addEventListener('click', () => {
+    if (resultDetails.style.display === 'none' || !resultDetails.style.display) {
+        resultDetails.style.display = 'block';
+        showDetails.textContent = 'Hide Details';
+    } else {
+        resultDetails.style.display = 'none';
+        showDetails.textContent = 'Show Details';
     }
 });
 
-document.querySelector('form').addEventListener('submit', async function(e) {
-    e.preventDefault(); // prevent form reload
+// Developer mode toggle
+devToggle.addEventListener('click', () => {
+    devSection.classList.toggle('active');
+    devToggle.textContent = devSection.classList.contains('active') ? 'HIDE DEV' : 'DEV MODE';
+});
+
+// Upload form handling
+uploadForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
     const fileInput = this.querySelector('input[type="file"]');
     const file = fileInput.files[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("audio_file", file);
-
-    try {
-        const response = await fetch('/predict', {
-            method: 'POST',
-            body: formData
-        });
-
-        const result = await response.json();
-        renderPredictionResult(result);
-    } catch (err) {
-        console.error('Upload prediction failed:', err);
-    }
+    setStatus('🔄 Menganalisis file audio...', 'processing');
+    
+    // Use the same predictWithAjax function for uploaded files
+    predictWithAjax(file);
 });
 
+// Cleanup
+window.addEventListener('beforeunload', () => {
+    stopAllTracks();
+    stopTimer();
+});
 
-// Debug: Log saat script dimuat
-console.log("Cat Meow Translator with recorder.js loaded at:", new Date().toISOString());
-console.log("Recorder.js available:", typeof Recorder !== 'undefined');
-console.log("AudioContext supported:", !!(window.AudioContext || window.webkitAudioContext));
+// Add script for recorder.js
+const script = document.createElement('script');
+// script.src = 'https://cdnjs.cloudflare.com/ajax/libs/recorder.js/0.1.0/recorder.min.js';
+script.onload = function() {
+    console.log('recorder.js loaded');
+};
+script.onerror = function() {
+    console.error('Failed to load recorder.js');
+    browserWarning.style.display = 'block';
+    browserWarning.innerHTML = '⚠️ Gagal memuat recorder.js. Pastikan koneksi internet stabil.';
+};
+document.head.appendChild(script);
+
+// Initialize
+console.log("Cat Meow Translator loaded!");

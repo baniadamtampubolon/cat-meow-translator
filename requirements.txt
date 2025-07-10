@@ -1,0 +1,6 @@
+Flask
+librosa
+numpy
+tensorflow
+google-generativeai
+python-dotenv

@@ -1,19 +1,19 @@
 # File: app.py 
 # This file is part of the Cat Meow Translator project.  
 from flask import Flask, render_template, request, jsonify, send_from_directory
-import librosa
-import numpy as np
-import os
 from tensorflow.keras.models import load_model
-import tempfile
-import time
-import uuid
-from datetime import datetime
-import traceback
-import logging
-import wave
 import google.generativeai as genai
 from dotenv import load_dotenv
+from datetime import datetime
+import numpy as np
+import traceback
+import logging
+import tempfile
+import librosa
+import time
+import uuid
+import wave
+import os
 
 load_dotenv()
 
